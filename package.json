@@ -24,6 +24,7 @@
     "socket.io": "^4.8.3"
   },
   "allowScripts": {
-    "@google/genai@2.21.0": true
+    "@google/genai@2.21.0": true,
+    "dotenv@17.4.2": true
   }
 }
