@@ -98,17 +98,24 @@ export const searchProfile = async(req, res) => {
 
 
 export const logout = async(req,res)=>{
+    console.log("I am ")
 
     const userId = req.user.id;
     const user = await User.findByIdAndUpdate(userId,{status:"inactive"});
     user.status = "inactive";
     await user.save();
+    console.log('i am here', user)
 
-    res.clearCookie("rafi_token");
+    res.clearCookie("rafi_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+    });
     res.status(200).json({message: "Log out successfully"});
 }
 
 export const loginUser = async (req, res) => {
+    console.log("I am here")
     try {
         const { email, password } = req.body;
         let { role } = req.body;
