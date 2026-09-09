@@ -104,7 +104,11 @@ export const logout = async(req,res)=>{
     user.status = "inactive";
     await user.save();
 
-    res.clearCookie("rafi_token");
+    res.clearCookie("rafi_token",{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+    });
     res.status(200).json({message: "Log out successfully"});
 }
 
