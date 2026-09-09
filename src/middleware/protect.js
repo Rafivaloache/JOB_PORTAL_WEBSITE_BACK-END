@@ -2,7 +2,6 @@
 import jwt from "jsonwebtoken"
 export const protectRouter = async(req, res, next)=>{
     const token = req.cookies.rafi_token;
-    console.log(token)
 
     if(!token){
         return res.status(401).json({message: "Not authorized"});
