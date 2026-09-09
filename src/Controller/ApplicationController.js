@@ -15,11 +15,9 @@ export const createApplication = async(req,res)=>{
     
     const application = await applicationService.createApplication({job_id, user_id});
     
-    const io = req.app.get("io");
+    
 
-   io.emit("newApplication", {
-    application
-    })
+    
     if(application){
         return res.status(201).json({message: "Application created successfully", application})
     }

@@ -108,55 +108,59 @@ export const logout = async(req,res)=>{
     res.status(200).json({message: "Log out successfully"});
 }
 
-export const loginUser = async(req,res)=>{
-    const {email, password ,isSuspend} = req.body;
-    let {role} = req.body;
-    
-    
-    if(role === undefined){
-        role = "user"
-    }
-    
-    const user = await authService.userExist({email});
-    if(!user){
-        return res.status(400).json({message: "User not exist"});
-    }
-    const checkPassword = await bcrypt.compare(password, user.password);
-   
-    if(!checkPassword){
-        return res.status(400).json({message: "Invalid credentials"});
-    }
-     const io = req.app.get("io");
+export const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        let { role } = req.body;
+        if (role === undefined) role = "user";
 
-    io.emit("loginng", {
-        user
-    })
-    user.status = "active";
-    await user.save();
+        const user = await authService.userExist({ email });
+        if (!user) {
+            return res.status(400).json({ message: "User not exist" });
+        }
 
-    const isSuspended = user?.isSuspend === false ? false : true
-    
-    const token = await jwt.sign({email, password, isSuspend:isSuspended, id: user._id, role:user.role}, process.env.JWT_SECRET, {expiresIn: "1d"});
-    res.cookie("rafi_token", token, {httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "none"});
-    if(isSuspended === true){
-         res.clearCookie("rafi_token");
-         res.status(400).json({message: "Your account has been suspended"});
-         
-         return
+        const checkPassword = await bcrypt.compare(password, user.password);
+        if (!checkPassword) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        user.status = "active";
+        await user.save();
+
+        const isSuspended = user?.isSuspend === false ? false : true;
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, isSuspend: isSuspended },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.cookie("rafi_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "none",
+        });
+
+        if (isSuspended === true) {
+            res.clearCookie("rafi_token");
+            return res.status(400).json({ message: "Your account has been suspended" });
+        }
+
+        res.status(200).json({
+            message: "Login successfully",
+            token,
+            user: {
+                email: user.email,
+                firstname: user.firstName,
+                status: user.status,
+                role: user.role,
+            },
+        });
+    } catch (err) {
+        console.error("loginUser error:", err);
+        res.status(500).json({ message: "Something went wrong, please try again" });
     }
-   
-    
-
-    res.status(200).json({message: "Login successfully", token, user:{
-        email: user.email,
-        firstname: user.firstName,
-        status: user.status,
-        role: user.role
-       
-        
-
-    }});
-}
+};
 
 export const updateProfile = async(req, res) => {
     const {email,firstName,lastName, role,isSuspend} = req.body;

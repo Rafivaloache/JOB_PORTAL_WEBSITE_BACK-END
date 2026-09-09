@@ -18,9 +18,21 @@ export const connectDB = async () => {
         throw new Error("MONGO_URL is not defined");
     }
 
-    // Reuse an existing healthy connection.
+    // Reuse an existing connection ONLY if we can prove it's actually alive.
+    // readyState === 1 is not enough on Vercel: it just reflects what our
+    // process last knew before being frozen, and can't detect a socket
+    // that Atlas or the network closed while we were paused. A real ping
+    // forces a round trip right now, so a dead socket fails fast and
+    // cleanly here instead of crashing deep inside a real query later.
     if (cached.conn && mongoose.connection.readyState === 1) {
-        return cached.conn;
+        try {
+            await mongoose.connection.db.admin().ping();
+            return cached.conn;
+        } catch (err) {
+            console.warn("Cached MongoDB connection failed ping, reconnecting:", err.message);
+            cached.conn = null;
+            cached.promise = null;
+        }
     }
 
     // A previous connection attempt exists but the socket is no longer
@@ -38,6 +50,10 @@ export const connectDB = async () => {
                 // Keep at least one socket warm so serverless invocations
                 // don't each pay a fresh handshake cost.
                 maxPoolSize: 5,
+                // Recycle idle sockets proactively instead of letting them
+                // go stale during a freeze/thaw gap.
+                maxIdleTimeMS: 10000,
+                heartbeatFrequencyMS: 10000,
             })
             .then((m) => {
                 console.log("MongoDB connected:", m.connection.host);
