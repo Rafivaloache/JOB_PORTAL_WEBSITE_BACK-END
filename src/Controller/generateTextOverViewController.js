@@ -44,8 +44,10 @@ export const generateTextJobOverView=async(req,res)=>{
                     model: "gemini-3.6-flash",
                     contents: prompt
                     config: {
-                    },
                         maxOutputTokens: 300,
+                        tempalature: 0.5
+                    },
+                        
                      })
                   const overview = response.text;
      
