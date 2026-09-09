@@ -43,7 +43,10 @@ export const generateTextJobOverView=async(req,res)=>{
                 const response = await ai.models.generateContent({
                     model: "gemini-3.6-flash",
                     contents: prompt
-                })
+                    config: {
+                    },
+                        maxOutputTokens: 300,
+                     })
                   const overview = response.text;
      
                   res.status(200).json({
