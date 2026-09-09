@@ -47,7 +47,7 @@ export const generateTextJobOverView=async(req,res)=>{
                    thinkingConfig: { thinkingLevel: "minimal" }, // kill the thinking overhead
                    maxOutputTokens: 200, // 3-5 lines doesn't need more than this
                  }
-                }       );
+                });
                   const overview = response.text;
      
                   res.status(200).json({
@@ -96,9 +96,13 @@ export const generateTextCoreResponsibilities=async(req,res)=>{
 
        try{
             const response = await ai.models.generateContent({
-                model: "gemini-3.6-flash",
-                contents: prompt
-            })
+                 model: "gemini-3.6-flash",
+                 contents: prompt,
+                 config: {
+                   thinkingConfig: { thinkingLevel: "minimal" }, // kill the thinking overhead
+                   maxOutputTokens: 200, // 3-5 lines doesn't need more than this
+                 }
+                });
           const core_responsibilities = response.text;
    
           res.status(200).json({
@@ -142,9 +146,13 @@ export const genereteKeyResponsibilities = async(req,res)=>{
 
        try{
             const response = await ai.models.generateContent({
-                model: "gemini-3.6-flash",
-                contents: prompt
-            })
+                 model: "gemini-3.6-flash",
+                 contents: prompt,
+                 config: {
+                   thinkingConfig: { thinkingLevel: "minimal" }, // kill the thinking overhead
+                   maxOutputTokens: 200, // 3-5 lines doesn't need more than this
+                 }
+                });
           const key_responsibilities = response.text;
    
           res.status(200).json({
