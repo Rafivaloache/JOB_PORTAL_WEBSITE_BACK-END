@@ -40,12 +40,14 @@ export const generateTextJobOverView=async(req,res)=>{
                 //  contents: prompt
                 //  });
 
-                const response = await ai.models.generateContent({
-                    model: "gemini-3.8-flash",
-                    contents: prompt,
-                    
-                        
-                     })
+               const response = await ai.models.generateContent({
+                 model: "gemini-3.6-flash",
+                 contents: prompt,
+                 config: {
+                   thinkingConfig: { thinkingLevel: "minimal" }, // kill the thinking overhead
+                   maxOutputTokens: 200, // 3-5 lines doesn't need more than this
+                 }
+                }       );
                   const overview = response.text;
      
                   res.status(200).json({
